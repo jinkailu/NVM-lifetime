@@ -17,20 +17,26 @@ struct cache{
     uint64_t addr;
     string compressbefor;
     string compressafter;
-    int noslc[512];
-    int nomlc[256];
-    int notlc[171];
-    int cslc[512];
-    int cmlc[256];
-    int ctlc[171];
+    uint8_t noslc[512];
+    uint8_t nomlc[256];
+    uint8_t notlc[171];
+    uint8_t cslc[512];
+    uint8_t cmlc[256];
+    uint8_t ctlc[171];
     struct cache *next;
 };
-
+struct cccc{
+    uint64_t addr;
+    string compressbefor;
+    string compressafter;
+};
 int main(){
     ifstream infile,ifile;
-    infile.open("/Users/jinkailun/Desktop/压缩算法/FPC/FPC/outfile.txt");
+    ofstream outfile;
+    infile.open("/Users/jinkailun/Desktop/BDI/BDI/outfile_all.txt");
     ifile.open("/Users/jinkailun/Desktop/rw.out");
-    cache ca;
+    outfile.open("/Users/jinkailun/Desktop/bitflipcount/bdi_all.txt");
+    cccc ca;
     cache *head=NULL;
     cache *p=NULL ,*pr = head;
     string a;
@@ -43,7 +49,8 @@ int main(){
         cout<<ca.compressbefor.length()<<endl;
         cout<<ca.compressafter.length()<<endl;
     }*/
-    while(numberall < 1000){
+    while(!infile.eof()){
+    //while(numberall < 100){
         ifile >> a;
         infile >> ca.addr;
         infile >> ca.compressbefor;
@@ -52,26 +59,38 @@ int main(){
         while(pr!=NULL){
             //cout<<pr->addr<< " "<<ca.addr<<" ";
             //cout<< a<<endl;
-            if(pr->addr == ca.addr && a == "W"){
+            if(pr->addr == ca.addr){
                 //cout<<1<<endl;
+                if( a == "W"){
                 for(int i = 0;i < ca.compressbefor.length();i++){
                     if(ca.compressbefor[i] != pr->compressbefor[i]){
                         flipnumnoc++;
                         pr->noslc[i]++;
-                        pr->nomlc[i/2]++;
-                        pr->notlc[i/3]++;
                     }
-                }
-                for(int i = 0;i < ca.compressafter.length();i++){
                     if(ca.compressafter[i] != pr->compressafter[i]){
                         flipnumc++;
                         pr->cslc[i]++;
+                    }
+                }
+                for(int i = 0;i < ca.compressbefor.length();i=i+2){
+                    if(ca.compressbefor[i] != pr->compressbefor[i] || ca.compressbefor[i+1] != pr->compressbefor[i+1]){
+                        pr->nomlc[i/2]++;
+                    }
+                    if(ca.compressafter[i] != pr->compressafter[i]|| ca.compressbefor[i+1] != pr->compressbefor[i+1]){
                         pr->cmlc[i/2]++;
-                        pr->ctlc[i/3]++;
+                    }
+                }
+                for(int i = 0;i < ca.compressbefor.length();i=i+3){
+                    if(ca.compressbefor[i] != pr->compressbefor[i] || ca.compressbefor[i+1] != pr->compressbefor[i+1]|| ca.compressbefor[i+2] != pr->compressbefor[i+2]){
+                        pr->notlc[i/3]++;
+                    }
+                    if(ca.compressafter[i] != pr->compressafter[i]||ca.compressbefor[i+1] != pr->compressbefor[i+1]|| ca.compressbefor[i+2] != pr->compressbefor[i+2]){
+                        pr->cmlc[i/3]++;
                     }
                 }
                 pr->compressbefor = ca.compressbefor;
                 pr->compressafter = ca.compressafter;
+                }
                 break;
             }
             pr = pr->next;
@@ -117,56 +136,63 @@ int main(){
             p->next = head->next;
             head->next=p;
         }
+        cout<<numberall<<endl;
         numberall++;
     }
-    cout<<"压缩前比特翻转"<<flipnumnoc<<endl;
-    cout<<"压缩后比特翻转"<<flipnumc<<endl;
+    outfile<<"压缩前比特翻转"<<flipnumnoc<<endl;
+    outfile<<"压缩后比特翻转"<<flipnumc<<endl;
     pr=head;
     int totalwritenoslc=0,totalwritecslc=0;
     int totalwritenomlc=0,totalwritecmlc=0;
     int totalwritenotlc=0,totalwritectlc=0;
     while(pr!=NULL){
-        cout<<"压缩前slc单元中每个单元的写入次数："<<endl;
+        outfile<<pr->addr<<endl;
+        outfile<<"压缩前slc单元中每个单元的写入次数："<<endl;
         for(int i = 0;i < 512;i++){
-            totalwritenoslc += pr->noslc[i];
-           cout<< pr->noslc[i]<<" ";
+            totalwritenoslc += (int)pr->noslc[i];
+            outfile<< (int)pr->noslc[i]<<" ";
         }
-        cout<<endl;
-        cout<<"压缩后slc单元中每个单元的写入次数："<<endl;
+        outfile<<endl;
+        outfile<<"压缩后slc单元中每个单元的写入次数："<<endl;
         for(int i = 0;i < 512;i++){
-            totalwritecslc += pr->cslc[i];
-            cout<<pr->cslc[i]<<" ";
+            totalwritecslc += (int)pr->cslc[i];
+            outfile<<(int)pr->cslc[i]<<" ";
         }
-        cout<<endl;
-        cout<<"压缩前mlc单元中每个单元的写入次数："<<endl;
+        outfile<<endl;
+        outfile<<"压缩前mlc单元中每个单元的写入次数："<<endl;
         for(int i = 0;i < 256;i++){
-            totalwritenomlc += pr->nomlc[i];
-           cout<< pr->nomlc[i]<<" ";
+            totalwritenomlc += (int)pr->nomlc[i];
+            outfile<< (int)pr->nomlc[i]<<" ";
         }
-        cout<<endl;
-        cout<<"压缩后mlc单元中每个单元的写入次数："<<endl;
+        outfile<<endl;
+        outfile<<"压缩后mlc单元中每个单元的写入次数："<<endl;
         for(int i = 0;i < 256;i++){
-            totalwritecmlc += pr->cmlc[i];
-            cout<<pr->cmlc[i]<<" ";
+            totalwritecmlc += (int)pr->cmlc[i];
+            outfile<<(int)pr->cmlc[i]<<" ";
         }
-        cout<<endl;
-        cout<<"压缩前tlc单元中每个单元的写入次数："<<endl;
+        outfile<<endl;
+        outfile<<"压缩前tlc单元中每个单元的写入次数："<<endl;
         for(int i = 0;i < 171;i++){
-            totalwritenotlc += pr->notlc[i];
-           cout<< pr->notlc[i]<<" ";
+            totalwritenotlc += (int)pr->notlc[i];
+            outfile<< (int)pr->notlc[i]<<" ";
         }
-        cout<<endl;
-        cout<<"压缩后tlc单元中每个单元的写入次数："<<endl;
+        outfile<<endl;
+        outfile<<"压缩后tlc单元中每个单元的写入次数："<<endl;
         for(int i = 0;i < 171;i++){
-            totalwritectlc += pr->ctlc[i];
-            cout<<pr->ctlc[i]<<" ";
+            totalwritectlc += (int)pr->ctlc[i];
+            outfile<<(int)pr->ctlc[i]<<" ";
         }
-        cout<<endl;
+        outfile<<endl;
+        p=pr;
         pr=pr->next;
+        free(p);
     }
-    cout<<"slc单元写入次数"<<totalwritecslc<<endl;
-    cout<<"mlc单元写入次数"<<totalwritecmlc<<endl;
-    cout<<"tlc单元写入次数"<<totalwritectlc<<endl;
+    outfile<<"slc单元写入次数"<<totalwritecslc<<endl;
+    outfile<<"mlc单元写入次数"<<totalwritecmlc<<endl;
+    outfile<<"tlc单元写入次数"<<totalwritectlc<<endl;
 }
+
+
+
 
 
