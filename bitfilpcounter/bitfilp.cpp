@@ -85,7 +85,7 @@ int main(){
                         pr->notlc[i/3]++;
                     }
                     if(ca.compressafter[i] != pr->compressafter[i]||ca.compressbefor[i+1] != pr->compressbefor[i+1]|| ca.compressbefor[i+2] != pr->compressbefor[i+2]){
-                        pr->cmlc[i/3]++;
+                        pr->ctlc[i/3]++;
                     }
                 }
                 pr->compressbefor = ca.compressbefor;
